@@ -90,8 +90,21 @@ int main() {
                     led2 = OFF;
                     ThisThread::sleep_for(500ms);
                 }
-                //Reset failed attempts after the warning
-                failed_attempts = 0; 
+            } 
+            //Lockdown triggered on 4th incorrect entry
+            else if (failed_attempts >= 4) {
+                led1 = ON; //Continuous LED for lockdown
+                
+                // Blinking LED for 1 minute
+                for (int i = 0; i < 60; i++) {
+                    led2 = ON;
+                    ThisThread::sleep_for(500ms);
+                    led2 = OFF;
+                    ThisThread::sleep_for(500ms);
+                }
+                
+                led1 = OFF;
+                failed_attempts = 0; //Reset counter after lockdown
             }
         }
     }
