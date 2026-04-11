@@ -1,11 +1,6 @@
-//=====[Libraries]=====
-
 #include "mbed.h"
 #include "arm_book_lib.h"
 
-//=====[Declaration and initialization of public global objects]=====
-
-//Buttons for the board to simulate switches
 DigitalIn switch1(D2); //Simulates Gas Detection
 DigitalIn switch3(D3); //Simulates Over-Temperature Detection
 DigitalIn switch4(D4); //Toggle Over-Temperature Alarm
@@ -13,24 +8,16 @@ DigitalIn switch5(D6); //Reset Alarms
 DigitalIn switch6(D7); //Enter/Exit Mode
 DigitalOut alarmLed(LED1);
 UnbufferedSerial uartUsb(USBTX, USBRX, 115200);
-
-//=====[Declaration and initialization of public global variables]=====
-
 bool gasAlarmState = OFF;
 bool tempAlarmState = OFF;
 bool lastSwitch4State = LOW; 
 bool lastSwitch6State = LOW;     
-bool monitoringModeActive = OFF; //To track if monitor is ON
-int monitoringCounter = 0;       //For the 2-second delay
-
-//=====[Declarations (prototypes) of public functions]=====
-
+bool monitoringModeActive = OFF;
+int monitoringCounter = 0;
 void inputsInit();
 void outputsInit();
 void alarmSystemUpdate();
 void uartTask();
-
-//=====[Main function]=====
 
 int main()
 {
@@ -40,11 +27,9 @@ int main()
     while (true) {
         alarmSystemUpdate();
         uartTask();
-        delay(10); //Delay for counter
+        delay(10);
     }
 }
-
-//=====[Implementations of public functions]=====
 
 void inputsInit()
 {
@@ -65,7 +50,6 @@ void alarmSystemUpdate()
     //If Switch 1 is pressed trigger the gas alarm
     if ( switch1 ) {
         if (gasAlarmState == OFF) {
-            //added obviously: Immediate warning for Task iv
             uartUsb.write( " WARNING: GAS DETECTED\r\n", 24 );
         }
         gasAlarmState = ON;
@@ -83,7 +67,6 @@ void alarmSystemUpdate()
     if ( switch4 == HIGH && lastSwitch4State == LOW ) {
         tempAlarmState = !tempAlarmState;
         if (tempAlarmState == ON) {
-            //Immediate warning when toggled ON via Switch 4
             uartUsb.write( " WARNING: TEMPERATURE TOO HIGH\r\n", 32 );
         } else {
             uartUsb.write( "TEMP ALARM CLEAR\r\n", 18 );
@@ -102,20 +85,17 @@ void alarmSystemUpdate()
     }
     lastSwitch6State = switch6;
 
-    //Continuous monitoring logic
     if ( monitoringModeActive ) {
         monitoringCounter++;
-        if ( monitoringCounter >= 200 ) { //2 seconds
+        if ( monitoringCounter >= 200 ) {
             if ( gasAlarmState ) uartUsb.write( "GAS: ACTIVE | ", 14 );
             else uartUsb.write( "GAS: CLEAR  | ", 14 );
-
             if ( tempAlarmState ) uartUsb.write( "TEMP: ACTIVE\r\n", 14 );
-            else uartUsb.write( "TEMP: CLEAR \r\n", 14 );
-            
-            monitoringCounter = 0; //Reset timer
+            else uartUsb.write( "TEMP: CLEAR \r\n", 14 ); 
+            monitoringCounter = 0;
         }
     } else {
-        monitoringCounter = 0; //Keep counter at 0 if monitor off
+        monitoringCounter = 0;
     }
 
     //If Switch 5 is pressed, reset the alarm
