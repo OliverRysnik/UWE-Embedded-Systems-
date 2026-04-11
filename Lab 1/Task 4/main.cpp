@@ -1,5 +1,6 @@
 #include "mbed.h"
-// Blinking rate in milliseconds
+
+//Blink rate in milliseconds
 #define BLINKING_RATE     200ms
 
 int main()
