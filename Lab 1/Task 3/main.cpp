@@ -1,6 +1,6 @@
 #include "mbed.h"
 
-// Blinking rate in milliseconds
+//Blink rate in milliseconds
 #define BLINKING_RATE     200ms
 
 int main()
@@ -9,7 +9,7 @@ int main()
     DigitalOut led1(LED1);
     DigitalOut led2(LED2);
     DigitalOut led3(LED3);
-
+    
     led1 = 0;
     led2 = 0;
     led3 = 0;
