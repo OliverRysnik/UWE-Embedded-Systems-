@@ -1,28 +1,15 @@
-//=====[Libraries]=====
-
 #include "mbed.h"
 #include "arm_book_lib.h"
 
-//=====[Declaration and initialization of public global objects]=====
-
-//Buttons for the board to simulate switches
 DigitalIn switch1(D2); //Simulates Gas Detection
 DigitalIn switch5(D6); //Reset Alarms
 DigitalOut alarmLed(LED1);
 UnbufferedSerial uartUsb(USBTX, USBRX, 115200);
-
-//=====[Declaration and initialization of public global variables]=====
-
 bool gasAlarmState = OFF;
-
-//=====[Declarations (prototypes) of public functions]=====
-
 void inputsInit();
 void outputsInit();
 void alarmSystemUpdate();
 void uartTask();
-
-//=====[Main function]=====
 
 int main()
 {
@@ -34,8 +21,6 @@ int main()
         uartTask();
     }
 }
-
-//=====[Implementations of public functions]=====
 
 void inputsInit()
 {
