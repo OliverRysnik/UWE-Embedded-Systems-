@@ -1,13 +1,14 @@
 #include "mbed.h"
 #include "arm_book_lib.h"
 
-//List of 6 input pins (D2 through D7) as buttons
+//List 6 input pins as buttons
 DigitalIn buttons[] = {
     DigitalIn(D2), DigitalIn(D3), DigitalIn(D4), 
     DigitalIn(D5), DigitalIn(D6), DigitalIn(D7)
 };
 
-//Scans all buttons to see if any are pressed.
+//Scans all buttons to see if any are pressed
+//Returns the index of first button detected as pressed
 int read_button() {
     for (int i = 0; i < 6; i++) {
         if (buttons[i]) { 
@@ -17,28 +18,23 @@ int read_button() {
     return -1; 
 }
 
-//The password
 int password[4] = {1, 1, 1, 1};
-//Admin code for override
 int admin_code[4] = {5, 5, 5, 5};
 
-
 int main() {
+    
     //LED's added
     DigitalOut led1(LED1);
     DigitalOut led2(LED2);
     DigitalOut led3(LED3);
     
-    //Make sure LEDs start as OFF
+    //Make sure LEDs start as off
     led1 = OFF;
     led2 = OFF;
     led3 = OFF;
 
-    //counter for failure
     int failed_attempts = 0;
-    //Flag to track if system locked
     bool is_locked = false;
-    //Timer for non-blocking lockdown
     Timer lockdown_timer;
 
     //The sequence entered by the user
@@ -53,7 +49,6 @@ int main() {
         for (int i = 0; i < 4; i++) {
             int value;
             do {
-                // If in lockdown, check if 60 seconds have passed to auto-unlock
                 if (is_locked && chrono::duration_cast<chrono::seconds>(lockdown_timer.elapsed_time()).count() >= 60) {
                     is_locked = false;
                     lockdown_timer.stop();
@@ -62,7 +57,6 @@ int main() {
                     failed_attempts = 0;
                 }
 
-                //Blink LED2 visually while waiting for buttons during lockdown
                 if (is_locked || failed_attempts >= 4) {
                     led2 = !led2;
                     ThisThread::sleep_for(100ms); 
@@ -71,11 +65,13 @@ int main() {
                 value = read_button();
             } while (value == -1);
 
+            //Store the ID of button
             entered_code[i] = value;
+            
+            //Debounce/delay to prevent a press being counted multiple times
             ThisThread::sleep_for(300ms);
         }
 
-        //Check if entered code matches admin code
         bool admin_correct = true;
         for (int i = 0; i < 4; i++) {
             if (entered_code[i] != admin_code[i]) {
@@ -84,16 +80,14 @@ int main() {
             }
         }
 
-        //Logic in lockdown mode
         if (is_locked) {
             if (admin_correct) {
-                is_locked = false; //Reset state
-                lockdown_timer.stop(); // Stop the timer override
-                failed_attempts = 0; //Reset counter
-                led1 = OFF; //Turn off lockdown indicators
+                is_locked = false; 
+                lockdown_timer.stop(); 
+                failed_attempts = 0; 
+                led1 = OFF; 
                 led2 = OFF;
             }
-            //After admin check, ignore entry and restart loop
             continue; 
         }
 
@@ -101,12 +95,11 @@ int main() {
         bool correct = true;
         for (int i = 0; i < 4; i++) {
             if (entered_code[i] != password[i]) {
-                correct = false; 
+                correct = false; //Mismatch found
                 break;
             }
         }
 
-        //Output
         if (correct) {
             led1 = ON; //Turn on Good LED
             failed_attempts = 0; //Reset counter on success
@@ -120,6 +113,7 @@ int main() {
 
             //Warning is triggered if 3 incorrect codes are entered consecutively 
             if (failed_attempts == 3) {
+                //Slowly blinking LED for 30 seconds 
                 for (int i = 0; i < 30; i++) {
                     led2 = ON;
                     ThisThread::sleep_for(500ms);
@@ -129,9 +123,9 @@ int main() {
             } 
             //Lockdown triggered on 4th incorrect entry
             else if (failed_attempts >= 4) {
-                is_locked = true; //Set system to lockdown state
-                led1 = ON; //Continuous LED for lockdown
-                lockdown_timer.reset(); //Start the 1-minute timer
+                is_locked = true; 
+                led1 = ON;
+                lockdown_timer.reset(); 
                 lockdown_timer.start();
             }
         }
