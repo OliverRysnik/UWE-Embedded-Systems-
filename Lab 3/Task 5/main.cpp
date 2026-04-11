@@ -1,11 +1,6 @@
-//=====[Libraries]=====
-
 #include "mbed.h"
 #include "arm_book_lib.h"
 
-//=====[Declaration and initialization of public global objects]=====
-
-//Buttons for the board to simulate switches
 DigitalIn switch1(D2); //Simulates Gas Detection
 DigitalIn switch3(D3); //Simulates Over-Temperature Detection
 DigitalIn switch4(D4); //Toggle Over-Temperature Alarm
@@ -13,38 +8,27 @@ DigitalIn switch5(D6); //Reset Alarms
 DigitalIn switch6(D7); //Enter/Exit Mode
 DigitalOut alarmLed(LED1);
 UnbufferedSerial uartUsb(USBTX, USBRX, 115200);
-
-//=====[Declaration and initialization of public global variables]=====
-
 bool gasAlarmState = OFF;
 bool tempAlarmState = OFF;
 bool lastSwitch4State = LOW; 
 bool lastSwitch6State = LOW;     
-bool monitoringModeActive = OFF; //To track if monitor is ON
-int monitoringCounter = 0;       //For the 2-second delay
-
-//=====[Declarations (prototypes) of public functions]=====
-
+bool monitoringModeActive = OFF;
+int monitoringCounter = 0;
 void inputsInit();
 void outputsInit();
 void alarmSystemUpdate();
 void uartTask();
 
-//=====[Main function]=====
-
 int main()
 {
     inputsInit();
-    outputsInit();
-    
+    outputsInit();  
     while (true) {
         alarmSystemUpdate();
         uartTask();
-        delay(10); //Delay for counter
+        delay(10);
     }
 }
-
-//=====[Implementations of public functions]=====
 
 void inputsInit()
 {
@@ -100,20 +84,17 @@ void alarmSystemUpdate()
     }
     lastSwitch6State = switch6;
 
-    //Continuous monitoring logic
     if ( monitoringModeActive ) {
         monitoringCounter++;
-        if ( monitoringCounter >= 200 ) { //2 seconds
+        if ( monitoringCounter >= 200 ) {
             if ( gasAlarmState ) uartUsb.write( "GAS: ACTIVE | ", 14 );
             else uartUsb.write( "GAS: CLEAR  | ", 14 );
-
             if ( tempAlarmState ) uartUsb.write( "TEMP: ACTIVE\r\n", 14 );
             else uartUsb.write( "TEMP: CLEAR \r\n", 14 );
-            
-            monitoringCounter = 0; //Reset timer
+            monitoringCounter = 0; 
         }
     } else {
-        monitoringCounter = 0; //Keep counter at 0 if monitor off
+        monitoringCounter = 0;
     }
 
     //If Switch 5 is pressed, all simulated alarms are cleared and reset message sent
@@ -125,7 +106,6 @@ void alarmSystemUpdate()
         gasAlarmState = OFF;
         tempAlarmState = OFF; 
     }
-
     alarmLed = gasAlarmState || tempAlarmState;
 }
 
