@@ -5,7 +5,7 @@
 
 int main()
 {
-    // Initialise the digital pin LED1 as an output
+    //Initialise the digital pin LED1 as an output
     DigitalOut led1(LED1);
     DigitalOut led2(LED2);
     DigitalOut led3(LED3);
