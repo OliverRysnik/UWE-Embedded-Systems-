@@ -1,39 +1,37 @@
 #include "mbed.h"
 #include "arm_book_lib.h"
 
-//List of 6 input pins (D2 through D7) as buttons
+//List 6 input pins as buttons
 DigitalIn buttons[] = {
     DigitalIn(D2), DigitalIn(D3), DigitalIn(D4), 
     DigitalIn(D5), DigitalIn(D6), DigitalIn(D7)
 };
 
-//Scans all buttons to see if any are pressed.
-//Returns the index (0-5) of the first button detected as pressed.
+//Scans all buttons to see if any are pressed
+//Returns the index of first button detected as pressed
 int read_button() {
     for (int i = 0; i < 6; i++) {
-        if (buttons[i]) { //This checks if the pin 'i' is high
-            return i;     //Thid returns the ID of the pressed button
+        if (buttons[i]) { 
+            return i;
         }
     }
-    return -1; //No input detected
+    return -1;
 }
 
-//The password
 int password[4] = {1, 1, 1, 1};
 
-
 int main() {
+    
     //LED's added
     DigitalOut led1(LED1);
     DigitalOut led2(LED2);
     DigitalOut led3(LED3);
     
-    //Make sure LEDs start as OFF
+    //Make sure LEDs start as off
     led1 = OFF;
     led2 = OFF;
     led3 = OFF;
 
-    //counter for failed
     int failed_attempts = 0;
 
     //The sequence entered by the user
@@ -41,8 +39,6 @@ int main() {
     for (int i = 0; i < 6; i++) {
         buttons[i].mode(PullDown);
     }
-
-
 
     while (true) {
 
@@ -69,7 +65,6 @@ int main() {
             }
         }
 
-        //Output
         if (correct) {
             led1 = ON; //Turn on Good LED
             failed_attempts = 0; //Reset counter on success
@@ -83,7 +78,7 @@ int main() {
 
             //Warning is triggered if 3 incorrect codes are entered consecutively 
             if (failed_attempts == 3) {
-                // Slowly blinking LED for 30 seconds 
+                //Slowly blinking LED for 30 seconds 
                 for (int i = 0; i < 30; i++) {
                     led2 = ON;
                     ThisThread::sleep_for(500ms);
@@ -91,20 +86,16 @@ int main() {
                     ThisThread::sleep_for(500ms);
                 }
             } 
-            //Lockdown triggered on 4th incorrect entry
             else if (failed_attempts >= 4) {
-                led1 = ON; //Continuous LED for lockdown
-                
-                // Blinking LED for 1 minute
+                led1 = ON;
                 for (int i = 0; i < 60; i++) {
                     led2 = ON;
                     ThisThread::sleep_for(500ms);
                     led2 = OFF;
                     ThisThread::sleep_for(500ms);
                 }
-                
                 led1 = OFF;
-                failed_attempts = 0; //Reset counter after lockdown
+                failed_attempts = 0; 
             }
         }
     }
