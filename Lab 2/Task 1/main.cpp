@@ -1,28 +1,27 @@
 #include "mbed.h"
 #include "arm_book_lib.h"
 
-//List of 6 input pins (D2 through D7) as buttons
+//List 6 input pins as buttons
 DigitalIn buttons[] = {
     DigitalIn(D2), DigitalIn(D3), DigitalIn(D4), 
     DigitalIn(D5), DigitalIn(D6), DigitalIn(D7)
 };
 
-//Scans all buttons to see if any are pressed.
-//Returns the index (0-5) of the first button detected as pressed.
+//Scans buttons to see if any are pressed
+//Returns the index of first button detected as pressed
 int read_button() {
     for (int i = 0; i < 6; i++) {
-        if (buttons[i]) { //This checks if the pin 'i' is high
-            return i;     //Thid returns the ID of the pressed button
+        if (buttons[i]) {
+            return i;
         }
     }
-    return -1; //No input detected
+    return -1;
 }
 
-//The password
 int password[4] = {1, 1, 1, 1};
 
-
 int main() {
+    
     //LED's added
     DigitalOut led1(LED1);
     DigitalOut led2(LED2);
@@ -37,7 +36,6 @@ int main() {
     for (int i = 0; i < 6; i++) {
         buttons[i].mode(PullDown);
     }
-
 
     while (true) {
 
@@ -59,18 +57,16 @@ int main() {
         bool correct = true;
         for (int i = 0; i < 4; i++) {
             if (entered_code[i] != password[i]) {
-                correct = false; //Mismatch found
+                correct = false;
                 break;
             }
         }
 
-        //Output result
         if (correct) {
-            led1 = ON; //Turn on Success LED)
+            led1 = ON; //Turn on success LED
         } else {
-            led3 = ON; //Turn on Failure LED
+            led3 = ON; //Turn on failure LED
         }
-        // Exit the loop
         break; 
     }
 }
